@@ -3,22 +3,57 @@
 <head>
   <meta charset="UTF-8">
   <title>Zine</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <style>
-    html, body {
+    body {
       margin: 0;
-      padding: 0;
-      height: 100%;
       background: #111;
     }
 
-    iframe {
-      width: 100%;
-      height: 100vh;
-      border: none;
+    .pdf-desktop {
+      display: none;
+    }
+
+    .mobile-message {
+      display: none;
+      color: white;
+      text-align: center;
+      padding: 2rem;
+      font-family: system-ui, sans-serif;
+    }
+
+    @media (min-width: 768px) {
+      .pdf-desktop {
+        display: block;
+        width: 100%;
+        height: 100vh;
+        border: none;
+      }
+    }
+
+    @media (max-width: 767px) {
+      .mobile-message {
+        display: block;
+      }
     }
   </style>
 </head>
+
 <body>
-  <iframe src="New Moon Film Zine Issue 1 Layout (1).pdf"></iframe>
+
+  <!-- Desktop PDF Embed -->
+  <iframe class="pdf-desktop" src="New Moon Film Zine Issue 1 Layout (1).pdf"></iframe>
+
+  <!-- Mobile Fallback -->
+  <div class="mobile-message">
+    <p>This zine opens best in fullscreen.</p>
+    <p>
+      <a href="New Moon Film Zine Issue 1 Layout (1).pdf" style="color:#fff; text-decoration:underline;">
+        Tap here to view the zine
+      </a>
+    </p>
+  </div>
+
 </body>
 </html>
