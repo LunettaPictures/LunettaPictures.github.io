@@ -12,19 +12,11 @@
       background: #000;
       color: #fff;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      height: 100%;
     }
 
-    /* Desktop PDF */
-    .pdf-desktop {
-      display: none;
-      width: 100%;
-      height: 100vh;
-      border: none;
-    }
-
-    /* Mobile entry screen */
-    .mobile-message {
-      display: none;
+    /* Entry screen */
+    .entry-screen {
       height: 100vh;
       display: flex;
       align-items: center;
@@ -33,7 +25,7 @@
       padding: 2rem;
     }
 
-    .mobile-message a {
+    .entry-screen a {
       color: #fff;
       font-size: 1.25rem;
       text-decoration: underline;
@@ -52,35 +44,29 @@
     video {
       width: 100%;
       height: 100%;
-      object-fit: contain; /* letterbox */
+      object-fit: contain; /* letterboxed */
       background: #000;
     }
 
-    @media (min-width: 768px) {
-      .pdf-desktop {
-        display: block;
-      }
-    }
-
-    @media (max-width: 767px) {
-      .mobile-message {
-        display: flex;
-      }
+    /* Desktop PDF embed (hidden until after video) */
+    .pdf-desktop {
+      display: none;
+      width: 100%;
+      height: 100vh;
+      border: none;
     }
   </style>
 </head>
 
 <body>
 
-  <!-- Desktop -->
-  <iframe class="pdf-desktop" src="New Moon Film Zine Issue 1 Layout (1).pdf"></iframe>
-
-  <!-- Mobile Entry -->
-  <div class="mobile-message">
+  <!-- Entry Screen (all devices) -->
+  <div class="entry-screen" id="entryScreen">
     <div>
-      <p>For the intended viewing experience</p>
+      <p>Welcome to the New Moon Film Zine</p>
+      <p>A labor of love by Lunetta Pictures</p>
       <p>
-        <a id="enter-zine">Enter</a>
+      <a id="enter-zine">Enter</a>
       </p>
     </div>
   </div>
@@ -92,25 +78,40 @@
     </video>
   </div>
 
+  <!-- Desktop PDF -->
+  <iframe class="pdf-desktop" id="pdfDesktop" src="New Moon Film Zine Issue 1 Layout (1).pdf"></iframe>
+
   <script>
     const enterButton = document.getElementById("enter-zine");
+    const entryScreen = document.getElementById("entryScreen");
     const videoOverlay = document.getElementById("videoOverlay");
     const introVideo = document.getElementById("introVideo");
+    const pdfDesktop = document.getElementById("pdfDesktop");
+
+    function openPDF() {
+      // Mobile: open PDF fullscreen
+      if (window.innerWidth < 768) {
+        window.location.href = "New Moon Film Zine Issue 1 Layout (1).pdf";
+      } 
+      // Desktop: show embedded PDF
+      else {
+        videoOverlay.style.display = "none";
+        pdfDesktop.style.display = "block";
+      }
+    }
 
     enterButton.addEventListener("click", () => {
+      entryScreen.style.display = "none";
       videoOverlay.style.display = "block";
       introVideo.play();
     });
 
-    introVideo.addEventListener("ended", () => {
-      window.location.href = "New Moon Film Zine Issue 1 Layout (1).pdf";
-    });
+    introVideo.addEventListener("ended", openPDF);
 
-    // Tap video to skip
-    introVideo.addEventListener("click", () => {
-      window.location.href = "New Moon Film Zine Issue 1 Layout (1).pdf";
-    });
+    // Tap / click video to skip
+    introVideo.addEventListener("click", openPDF);
   </script>
 
 </body>
 </html>
+
