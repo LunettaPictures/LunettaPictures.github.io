@@ -1,118 +1,154 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>The New Moon Zine</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <title>New Moon Film Zine</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <style>
     html, body {
       margin: 0;
       padding: 0;
-      background: #000;
-      color: #fff;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: black;
       height: 100%;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+      color: white;
     }
 
-    /* Entry screen */
-    .entry-screen {
-      height: 100vh;
+    /* ---------- INTRO MESSAGE ---------- */
+
+    .intro {
+      position: fixed;
+      inset: 0;
+      background: black;
       display: flex;
       align-items: center;
       justify-content: center;
       text-align: center;
-      padding: 2rem;
+      z-index: 20;
+      opacity: 1;
+      transition: opacity 1s ease;
+      padding: 20px;
     }
 
-    .entry-screen a {
-      color: #fff;
-      font-size: 1.25rem;
+    .intro.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .intro-content p {
+      margin: 12px 0;
+      font-size: 18px;
+      line-height: 1.4;
+    }
+
+    .enter {
+      margin-top: 30px;
+      font-size: 18px;
       text-decoration: underline;
       cursor: pointer;
     }
 
-    /* Video overlay */
+    /* ---------- VIDEO ---------- */
+
     .video-overlay {
-      display: none;
       position: fixed;
       inset: 0;
-      background: #000;
+      background: black;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       z-index: 10;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 1s ease;
+    }
+
+    .video-overlay.show {
+      opacity: 1;
+      pointer-events: auto;
     }
 
     video {
       width: 100%;
       height: 100%;
-      object-fit: contain; /* letterboxed */
-      background: #000;
+      object-fit: contain;
+      background: black;
     }
 
-    /* Desktop PDF embed (hidden until after video) */
-    .pdf-desktop {
+    /* ---------- PDF ---------- */
+
+    .pdf-container {
       display: none;
-      width: 100%;
       height: 100vh;
+      width: 100vw;
+      background: black;
+    }
+
+    .pdf-container.show {
+      display: block;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
       border: none;
+      background: black;
     }
   </style>
 </head>
 
 <body>
 
-  <!-- Entry Screen (all devices) -->
-  <div class="entry-screen" id="entryScreen">
-    <div>
-      <p>Welcome to the New Moon Film Zine</p>
-      <p>A labor of Love by Lunetta Pictures</p>
-      <p>
-        <a id="enter-zine">Enter</a>
-      </p>
+  <!-- INTRO MESSAGE -->
+  <div class="intro" id="intro">
+    <div class="intro-content">
+      <p>Welcome to the New Moon Film Zine.</p>
+      <p>A labor of love by Lunetta Pictures.</p>
+      <div class="enter" id="enter">Enter</div>
     </div>
   </div>
 
-  <!-- Video -->
+  <!-- VIDEO -->
   <div class="video-overlay" id="videoOverlay">
     <video id="introVideo" playsinline>
       <source src="Intro Animatic V2.5.mp4" type="video/mp4">
     </video>
   </div>
 
-  <!-- Desktop PDF -->
-  <iframe class="pdf-desktop" id="pdfDesktop" src="New Moon Film Zine Issue Final.pdf"></iframe>
+  <!-- PDF -->
+  <div class="pdf-container" id="pdfContainer">
+    <iframe src="New Moon Film Zine Issue Final.pdf"></iframe>
+  </div>
 
   <script>
-    const enterButton = document.getElementById("enter-zine");
-    const entryScreen = document.getElementById("entryScreen");
+    const intro = document.getElementById("intro");
+    const enter = document.getElementById("enter");
     const videoOverlay = document.getElementById("videoOverlay");
-    const introVideo = document.getElementById("introVideo");
-    const pdfDesktop = document.getElementById("pdfDesktop");
+    const video = document.getElementById("introVideo");
+    const pdf = document.getElementById("pdfContainer");
 
-    function openPDF() {
-      // Mobile: open PDF fullscreen
-      if (window.innerWidth < 768) {
-        window.location.href = "New Moon Film Zine Issue Final.pdf";
-      } 
-      // Desktop: show embedded PDF
-      else {
-        videoOverlay.style.display = "none";
-        pdfDesktop.style.display = "block";
-      }
-    }
+    enter.addEventListener("click", () => {
+      intro.classList.add("fade-out");
 
-    enterButton.addEventListener("click", () => {
-      entryScreen.style.display = "none";
-      videoOverlay.style.display = "block";
-      introVideo.play();
+      setTimeout(() => {
+        intro.style.display = "none";
+        videoOverlay.classList.add("show");
+        video.muted = false;
+        video.play();
+      }, 1000);
     });
 
-    introVideo.addEventListener("ended", openPDF);
+    video.onended = () => {
+      videoOverlay.classList.remove("show");
 
-    // Tap / click video to skip
-    introVideo.addEventListener("click", openPDF);
+      setTimeout(() => {
+        videoOverlay.style.display = "none";
+        pdf.classList.add("show");
+      }, 1000);
+    };
   </script>
 
 </body>
 </html>
-
-
