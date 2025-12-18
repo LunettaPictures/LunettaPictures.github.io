@@ -16,7 +16,7 @@
       color: white;
     }
 
-    /* ---------- INTRO MESSAGE ---------- */
+    /* ---------- INTRO ---------- */
 
     .intro {
       position: fixed;
@@ -26,7 +26,7 @@
       align-items: center;
       justify-content: center;
       text-align: center;
-      z-index: 20;
+      z-index: 30;
       opacity: 1;
       transition: opacity 1s ease;
       padding: 20px;
@@ -59,7 +59,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 10;
+      z-index: 20;
       opacity: 0;
       pointer-events: none;
       transition: opacity 1s ease;
@@ -77,31 +77,56 @@
       background: black;
     }
 
-    /* ---------- PDF ---------- */
+    /* ---------- PAGES ---------- */
 
-    .pdf-container {
+    .viewer {
       display: none;
-      height: 100vh;
-      width: 100vw;
+      position: fixed;
+      inset: 0;
       background: black;
+      align-items: center;
+      justify-content: center;
     }
 
-    .pdf-container.show {
-      display: block;
+    .viewer.show {
+      display: flex;
     }
 
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-      background: black;
+    .page {
+      max-width: 95vw;
+      max-height: 95vh;
+    }
+
+    /* ---------- NAV ---------- */
+
+    .nav {
+      position: fixed;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 32px;
+      color: white;
+      background: rgba(0,0,0,0.4);
+      padding: 10px 16px;
+      cursor: pointer;
+      user-select: none;
+      z-index: 10;
+    }
+
+    .nav.left { left: 10px; }
+    .nav.right { right: 10px; }
+
+    @media (max-width: 768px) {
+      .nav {
+        font-size: 26px;
+        padding: 8px 12px;
+      }
     }
   </style>
 </head>
 
 <body>
 
-  <!-- INTRO MESSAGE -->
+  <!-- INTRO -->
   <div class="intro" id="intro">
     <div class="intro-content">
       <p>Welcome to the New Moon Film Zine.</p>
@@ -117,9 +142,11 @@
     </video>
   </div>
 
-  <!-- PDF -->
-  <div class="pdf-container" id="pdfContainer">
-    <iframe src="New Moon Film Zine Issue Final.pdf"></iframe>
+  <!-- IMAGE VIEWER -->
+  <div class="viewer" id="viewer">
+    <div class="nav left" onclick="prevPage()">‹</div>
+    <img id="pageImage" class="page" src="pages/page01.png">
+    <div class="nav right" onclick="nextPage()">›</div>
   </div>
 
   <script>
@@ -127,7 +154,28 @@
     const enter = document.getElementById("enter");
     const videoOverlay = document.getElementById("videoOverlay");
     const video = document.getElementById("introVideo");
-    const pdf = document.getElementById("pdfContainer");
+    const viewer = document.getElementById("viewer");
+    const pageImage = document.getElementById("pageImage");
+
+    const pages = [
+      "pages/page01.png",
+      "pages/page02.png",
+      "pages/page03.png",
+      "pages/page04.png",
+      "pages/page05.png",
+      "pages/page06.png",
+      "pages/page07.png",
+      "pages/page08.png",
+      "pages/page09.png",
+      "pages/page10.png",
+      "pages/page11.png",
+      "pages/page12.png",
+      "pages/page13.png",
+      "pages/page14.png",
+      "pages/page15.png",
+    ];
+
+    let currentPage = 0;
 
     enter.addEventListener("click", () => {
       intro.classList.add("fade-out");
@@ -145,9 +193,46 @@
 
       setTimeout(() => {
         videoOverlay.style.display = "none";
-        pdf.classList.add("show");
+        viewer.classList.add("show");
       }, 1000);
     };
+
+    function updatePage() {
+      pageImage.src = pages[currentPage];
+    }
+
+    function nextPage() {
+      if (currentPage < pages.length - 1) {
+        currentPage++;
+        updatePage();
+      }
+    }
+
+    function prevPage() {
+      if (currentPage > 0) {
+        currentPage--;
+        updatePage();
+      }
+    }
+
+    // Swipe support
+    let startX = 0;
+
+    viewer.addEventListener("touchstart", e => {
+      startX = e.touches[0].clientX;
+    });
+
+    viewer.addEventListener("touchend", e => {
+      let diff = e.changedTouches[0].clientX - startX;
+      if (diff > 50) prevPage();
+      if (diff < -50) nextPage();
+    });
+
+    // Keyboard arrows (desktop)
+    document.addEventListener("keydown", e => {
+      if (e.key === "ArrowRight") nextPage();
+      if (e.key === "ArrowLeft") prevPage();
+    });
   </script>
 
 </body>
