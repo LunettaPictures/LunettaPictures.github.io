@@ -9,19 +9,18 @@
     html, body {
       margin: 0;
       padding: 0;
-      background: black;
+      background: #000;
       height: 100%;
       overflow: hidden;
       font-family: Arial, sans-serif;
-      color: white;
+      color: #fff;
     }
 
     /* ---------- INTRO ---------- */
-
     .intro {
       position: fixed;
       inset: 0;
-      background: black;
+      background: #000;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -31,18 +30,15 @@
       transition: opacity 1s ease;
       padding: 20px;
     }
-
     .intro.fade-out {
       opacity: 0;
       pointer-events: none;
     }
-
     .intro-content p {
       margin: 12px 0;
       font-size: 18px;
       line-height: 1.4;
     }
-
     .enter {
       margin-top: 30px;
       font-size: 18px;
@@ -51,11 +47,10 @@
     }
 
     /* ---------- VIDEO ---------- */
-
     .video-overlay {
       position: fixed;
       inset: 0;
-      background: black;
+      background: #000;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -64,33 +59,27 @@
       pointer-events: none;
       transition: opacity 1s ease;
     }
-
     .video-overlay.show {
       opacity: 1;
       pointer-events: auto;
     }
-
     video {
       width: 100%;
       height: 100%;
-      object-fit: contain;
-      background: black;
+      object-fit: contain; /* letterboxed */
+      background: #000;
     }
 
-    /* ---------- PAGES ---------- */
-
+    /* ---------- IMAGE VIEWER ---------- */
     .viewer {
       display: none;
       position: fixed;
       inset: 0;
-      background: black;
+      background: #000;
       align-items: center;
       justify-content: center;
     }
-
-    .viewer.show {
-      display: flex;
-    }
+    .viewer.show { display: flex; }
 
     .page {
       max-width: 95vw;
@@ -98,34 +87,28 @@
     }
 
     /* ---------- NAV ---------- */
-
     .nav {
       position: fixed;
       top: 50%;
       transform: translateY(-50%);
       font-size: 32px;
-      color: white;
+      color: #fff;
       background: rgba(0,0,0,0.4);
       padding: 10px 16px;
       cursor: pointer;
       user-select: none;
       z-index: 10;
     }
-
     .nav.left { left: 10px; }
     .nav.right { right: 10px; }
 
     @media (max-width: 768px) {
-      .nav {
-        font-size: 26px;
-        padding: 8px 12px;
-      }
+      .nav { font-size: 26px; padding: 8px 12px; }
     }
   </style>
 </head>
 
 <body>
-
   <!-- INTRO -->
   <div class="intro" id="intro">
     <div class="intro-content">
@@ -144,58 +127,48 @@
 
   <!-- IMAGE VIEWER -->
   <div class="viewer" id="viewer">
-    <div class="nav left" onclick="prevPage()">‹</div>
-    <img id="pageImage" class="page" src="pages/page01.png">
-    <div class="nav right" onclick="nextPage()">›</div>
+    <div class="nav left" id="prevBtn">‹</div>
+    <img id="pageImage" class="page" alt="Zine page">
+    <div class="nav right" id="nextBtn">›</div>
   </div>
 
   <script>
+    // ---- AUTO-DETECT BASE PATH (fixes GitHub Pages project-site paths) ----
+    // If your site is https://username.github.io/repo-name/, basePath becomes "/repo-name"
+    // If your site is https://username.github.io/, basePath becomes ""
+    function getBasePath() {
+      const parts = window.location.pathname.split("/").filter(Boolean);
+      // User site: username.github.io -> pathname often "/" or "/index.html" => parts length 0 or 1
+      // Project site: username.github.io/repo/ -> parts[0] is "repo"
+      if (parts.length === 0) return "";
+      // If only "index.html" (or similar) is present, treat as user site
+      if (parts.length === 1 && parts[0].includes(".")) return "";
+      // Otherwise first segment is repo name
+      return "/" + parts[0];
+    }
+
+    const basePath = getBasePath();
+
+    // ---- CONFIG: how many pages do you have? ----
+    const totalPages = 15; // <-- change if needed
+
+    // Build pages list like: /<repo>/pages/page01.png
+    function pad2(n) { return String(n).padStart(2, "0"); }
+    const pages = Array.from({ length: totalPages }, (_, i) => {
+      const num = pad2(i + 1);
+      return `${basePath}/pages/page${num}.png`;
+    });
+
     const intro = document.getElementById("intro");
     const enter = document.getElementById("enter");
     const videoOverlay = document.getElementById("videoOverlay");
     const video = document.getElementById("introVideo");
     const viewer = document.getElementById("viewer");
     const pageImage = document.getElementById("pageImage");
-
-    const pages = [
-      "../pages/page01.png",
-      "../pages/page02.png",
-      "../pages/page03.png",
-      "../pages/page04.png",
-      "../pages/page05.png",
-      "../pages/page06.png",
-      "../pages/page07.png",
-      "../pages/page08.png",
-      "../pages/page09.png",
-      "../pages/page10.png",
-      "../pages/page11.png",
-      "../pages/page12.png",
-      "../pages/page13.png",
-      "../pages/page14.png",
-      "../pages/page15.png"
-    ];
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
 
     let currentPage = 0;
-
-    enter.addEventListener("click", () => {
-      intro.classList.add("fade-out");
-
-      setTimeout(() => {
-        intro.style.display = "none";
-        videoOverlay.classList.add("show");
-        video.muted = false;
-        video.play();
-      }, 1000);
-    });
-
-    video.onended = () => {
-      videoOverlay.classList.remove("show");
-
-      setTimeout(() => {
-        videoOverlay.style.display = "none";
-        viewer.classList.add("show");
-      }, 1000);
-    };
 
     function updatePage() {
       pageImage.src = pages[currentPage];
@@ -215,25 +188,49 @@
       }
     }
 
+    // Button wiring
+    prevBtn.addEventListener("click", prevPage);
+    nextBtn.addEventListener("click", nextPage);
+
     // Swipe support
     let startX = 0;
-
-    viewer.addEventListener("touchstart", e => {
-      startX = e.touches[0].clientX;
-    });
-
+    viewer.addEventListener("touchstart", e => { startX = e.touches[0].clientX; });
     viewer.addEventListener("touchend", e => {
-      let diff = e.changedTouches[0].clientX - startX;
+      const diff = e.changedTouches[0].clientX - startX;
       if (diff > 50) prevPage();
       if (diff < -50) nextPage();
     });
 
-    // Keyboard arrows (desktop)
+    // Keyboard support (desktop)
     document.addEventListener("keydown", e => {
       if (e.key === "ArrowRight") nextPage();
       if (e.key === "ArrowLeft") prevPage();
     });
-  </script>
 
+    // Flow: Intro -> Video (with sound) -> Fade -> Pages
+    enter.addEventListener("click", () => {
+      intro.classList.add("fade-out");
+
+      setTimeout(() => {
+        intro.style.display = "none";
+        videoOverlay.classList.add("show");
+        video.muted = false;  // sound enabled due to user click
+        video.play();
+      }, 1000);
+    });
+
+    video.addEventListener("ended", () => {
+      videoOverlay.classList.remove("show");
+
+      setTimeout(() => {
+        videoOverlay.style.display = "none";
+        viewer.classList.add("show");
+        updatePage(); // load first page
+      }, 1000);
+    });
+
+    // Optional: also start with first page ready (helps perceived load)
+    updatePage();
+  </script>
 </body>
 </html>
